@@ -1,5 +1,5 @@
 import { View, Text, Image, TouchableOpacity } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
+
 import { router } from 'expo-router';
 
 export default function WelcomeScreen() {

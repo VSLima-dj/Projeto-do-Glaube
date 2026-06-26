@@ -1,139 +1,212 @@
 import React, { useRef, useState } from 'react';
 import {
-View,
-Text,
-StyleSheet,
-TextInput,
-TouchableOpacity,
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { router } from 'expo-router';
 import { AntDesign } from '@expo/vector-icons';
 
-import GreenButton from './components/GreenButton';
+const GREEN = '#00b612';
+const DIGITS = 6;
 
 export default function EsqueciSenha() {
-const [codigo, setCodigo] = useState([
-'',
-'',
-'',
-'',
-'',
-'',
-]);
+  const EXEMPLO = ['1', '9', '0', '1', '2', '6'];
+  const [codigo, setCodigo] = useState<string[]>(Array(DIGITS).fill(''));
+  const inputs = useRef<(TextInput | null)[]>([]);
 
-const inputs = useRef<TextInput[]>([]);
+  function handleChange(text: string, index: number) {
+    // Aceita só número
+    const digito = text.replace(/[^0-9]/g, '').slice(-1);
+    const novoCodigo = [...codigo];
+    novoCodigo[index] = digito;
+    setCodigo(novoCodigo);
 
-const handleChange = (
-text: string,
-index: number
-) => {
-const novoCodigo = [...codigo];
+    // Avança para o próximo campo automaticamente
+    if (digito && index < DIGITS - 1) {
+      inputs.current[index + 1]?.focus();
+    }
+  }
 
+  function handleKeyPress(key: string, index: number) {
+    // Volta campo ao apagar
+    if (key === 'Backspace' && !codigo[index] && index > 0) {
+      inputs.current[index - 1]?.focus();
+    }
+  }
 
-novoCodigo[index] = text;
+  function handleVerificar() {
+    const codigoCompleto = codigo.join('');
+    if (codigoCompleto.length < DIGITS) {
+      Alert.alert('Código incompleto', 'Preencha todos os 6 dígitos do código.');
+      return;
+    }
+    router.push('/recuperar');
+  }
 
-setCodigo(novoCodigo);
+  function handleReenviar() {
+    setCodigo(Array(DIGITS).fill(''));
+    inputs.current[0]?.focus();
+    Alert.alert('Código reenviado', 'Um novo código foi enviado para seu e-mail.');
+  }
 
-if (text && index < 5) {
-  inputs.current[index + 1]?.focus();
-}
+  return (
+    <View style={styles.container}>
 
+      {/* Botão Voltar */}
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <AntDesign name="left" size={24} color="#666" />
+      </TouchableOpacity>
 
-};
+      {/* Título */}
+      <Text style={styles.title}>
+        Altere sua{'\n'}
+        <Text style={styles.titleUnderline}>sen</Text>
+        <Text>ha</Text>
+      </Text>
 
-function handleVerificar() {
-router.push('/recuperar');
-}
+      {/* Descrição */}
+      <Text style={styles.description}>
+        Enviaremos um código para seu Email. Confirme o código para alterarmos para uma nova senha para sua conta.
+      </Text>
 
-return ( <View style={styles.container}>
-<TouchableOpacity
-style={styles.backButton}
-onPress={() => router.back()}
-> <AntDesign
-       name="left"
-       size={26}
-       color="#000"
-     /> </TouchableOpacity>
+      {/* Campos de código */}
+      <View style={styles.codeContainer}>
+        {codigo.map((valor, index) => (
+          <TextInput
+            key={index}
+            ref={(ref) => { inputs.current[index] = ref; }}
+            style={[
+              styles.codeInput,
+              valor !== '' && styles.codeInputFilled,
+            ]}
+            keyboardType="numeric"
+            maxLength={1}
+            value={valor}
+            placeholder={EXEMPLO[index]}
+            placeholderTextColor="#adadadff"
+            onChangeText={(text) => handleChange(text, index)}
+            onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, index)}
+            selectTextOnFocus
+          />
+        ))}
+      </View>
 
+      {/* Reenviar código */}
+      <View style={styles.reenviarContainer}>
+        <Text style={styles.reenviarTexto}>Não recebeu o código?  </Text>
+        <TouchableOpacity onPress={handleReenviar}>
+          <Text style={styles.reenviarLink}>clique aqui para reenviar.</Text>
+        </TouchableOpacity>
+      </View>
 
-  <Text style={styles.title}>
-    Esqueceu sua senha?
-  </Text>
+      {/* Botão Alterar senha */}
+      <TouchableOpacity style={styles.button} onPress={handleVerificar} activeOpacity={0.85}>
+        <Text style={styles.buttonText}>Alterar senha</Text>
+      </TouchableOpacity>
 
-  <Text style={styles.description}>
-    Digite o código enviado para seu e-mail.
-  </Text>
-
-  <View style={styles.codeContainer}>
-    {codigo.map((valor, index) => (
-      <TextInput
-        key={index}
-        ref={(ref) => {
-          if (ref) {
-            inputs.current[index] = ref;
-          }
-        }}
-        style={styles.codeInput}
-        keyboardType="numeric"
-        maxLength={1}
-        value={valor}
-        onChangeText={(text) =>
-          handleChange(text, index)
-        }
-      />
-    ))}
-  </View>
-
-  <GreenButton
-    title="Verificar"
-    onPress={handleVerificar}
-  />
-</View>
-
-
-);
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-container: {
-flex: 1,
-backgroundColor: '#FAFAFA',
-paddingHorizontal: 30,
-paddingTop: 70,
-},
+  container: {
+    flex: 1,
+    backgroundColor: '#F5F5F5',
+    paddingHorizontal: 30,
+    paddingTop: 70,
+  },
 
-backButton: {
-marginBottom: 35,
-},
+  backButton: {
+    marginBottom: 140,
+    alignSelf: 'flex-start',
+  },
 
-title: {
-fontSize: 32,
-fontWeight: '700',
-color: '#000',
-marginBottom: 10,
-},
+  title: {
 
-description: {
-fontSize: 16,
-color: '#666',
-marginBottom: 40,
-},
+    fontSize: 40,
+    fontWeight: '800',
+    color: GREEN,
+    marginBottom: 16,
+    lineHeight: 46,
+  },
 
-codeContainer: {
-flexDirection: 'row',
-justifyContent: 'space-between',
-marginBottom: 45,
-},
+  titleUnderline: {
+    textDecorationLine: 'underline',
+    color: GREEN,
+    fontWeight: '800',
+    fontSize: 38,
+  },
 
-codeInput: {
-width: 48,
-height: 58,
-borderWidth: 1,
-borderColor: '#D9D9D9',
-borderRadius: 12,
-backgroundColor: '#FFF',
-textAlign: 'center',
-fontSize: 22,
-fontWeight: '600',
-},
+  description: {
+    marginTop: -10,
+    fontSize: 13,
+    width: 300,
+    color: '#c9c9c9',
+    fontWeight: '600',
+    lineHeight: 20,
+    marginBottom: 48,
+  },
+
+  codeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+
+  codeInput: {
+    width: 52,
+    height: 64,
+    borderWidth: 1.5,
+    borderColor: '#D9D9D9',
+    borderRadius: 10,
+    backgroundColor: '#FFF',
+    textAlign: 'center',
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#BDBDBD',
+  },
+
+  codeInputFilled: {
+    borderColor: GREEN,
+    borderWidth: 2,
+    color: '#BDBDBD',
+  },
+
+  reenviarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 48,
+    flexWrap: 'wrap',
+  },
+
+  reenviarTexto: {
+    fontSize: 12,
+    color: '#c9c9c9',
+    fontWeight: '600',
+  },
+
+  reenviarLink: {
+    fontSize: 12,
+    color: GREEN,
+    fontWeight: 'bold',
+  },
+
+  button: {
+    backgroundColor: GREEN,
+    height: 60,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  buttonText: {
+    color: '#FFF',
+    fontSize: 20,
+    fontWeight: 'bold',
+    letterSpacing: 0.3,
+  },
 });

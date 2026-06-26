@@ -1,216 +1,291 @@
 import React, { useState } from 'react';
 import {
-View,
-Text,
-StyleSheet,
-Image,
-TouchableOpacity,
-Alert,
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from 'react-native';
+
 import { router } from 'expo-router';
-
-import { FontAwesome } from '@expo/vector-icons';
-
-import CustomInput from './components/CustomInput';
-import PasswordInput from './components/PasswordInput';
-import GreenButton from './components/GreenButton';
+import { FontAwesome, Feather } from '@expo/vector-icons';
 
 export default function Login() {
-const [email, setEmail] = useState('');
-const [senha, setSenha] = useState('');
-const [lembrar, setLembrar] = useState(false);
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [lembrar, setLembrar] = useState(false);
+  const [senhaVisivel, setSenhaVisivel] = useState(false);
 
-function handleLogin() {
-if (!email.trim() || !senha.trim()) {
-Alert.alert(
-'Campos obrigatórios',
-'Preencha e-mail e senha.'
-);
-return;
-}
+  function handleLogin() {
+    if (!email.trim() || !senha.trim()) {
+      Alert.alert('Campos obrigatórios', 'Preencha o email e a senha.');
+      return;
+    }
+    router.push('/home');
+  }
 
-router.push('./home');
+  return (
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <View style={styles.container}>
 
+        {/* Imagem Superior */}
+        <Image
+          source={require('./src/ImagemDec.png')}
+          style={styles.topImage}
+          resizeMode="stretch"
+        />
 
-}
+        {/* Card Branco — sobe sobre a imagem com marginTop negativo */}
+        <View style={styles.card}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{ paddingBottom: 40 }}
+          >
 
-return ( <View style={styles.container}>
-  <Image
-    source={require('../assets/images/react-logo.png')}
-    style={styles.topImage}
-    resizeMode="contain"
-  />
+            {/* Título Login */}
+            <Text style={styles.title}>Login</Text>
+            <View style={styles.titleUnderline} />
 
+            {/* Subtítulo */}
+            <Text style={styles.subtitle}>Que bom lhe ter de volta!</Text>
 
-  <View style={styles.content}>
-    <Text style={styles.title}>Olá,</Text>
+            {/* EMAIL */}
+            <Text style={styles.label}>Email</Text>
+            <View style={styles.inputContainer}>
+              <FontAwesome name="envelope-o" size={16} color="#BDBDBD" />
+              <TextInput
+                placeholder="nome@gmail.com"
+                placeholderTextColor="#BDBDBD"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                style={styles.input}
+              />
+            </View>
 
-    <Text style={styles.subtitle}>
-      Bem-vindo de volta!
-    </Text>
+            {/* SENHA */}
+            <Text style={styles.label}>Senha</Text>
+            <View style={styles.inputContainer}>
+              <FontAwesome name="lock" size={20} color="#BDBDBD" />
+              <TextInput
+                placeholder="Qual sua senha?"
+                placeholderTextColor="#BDBDBD"
+                secureTextEntry={!senhaVisivel}
+                value={senha}
+                onChangeText={setSenha}
+                style={styles.input}
+              />
+              <TouchableOpacity onPress={() => setSenhaVisivel(!senhaVisivel)}>
+                 <Feather
+                name={senhaVisivel ? 'eye' : 'eye-off'}
+                size={20}
+                color="#BFBFBF"
+              />
+              </TouchableOpacity>
+            </View>
 
-    <View style={styles.form}>
-      <CustomInput
-        icon={
-          <FontAwesome
-            name="envelope-o"
-            size={20}
-            color="#A0A0A0"
-          />
-        }
-        placeholder="E-mail"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-      />
+            {/* ESQUECEU SENHA */}
+            <TouchableOpacity onPress={() => router.push('/esqueci')}>
+              <Text style={styles.forgotPassword}>
+                esqueceu a senha?{' '}
+                <Text style={styles.forgotLink}>clique aqui.</Text>
+              </Text>
+            </TouchableOpacity>
 
-      <PasswordInput
-        icon={
-          <FontAwesome
-            name="lock"
-            size={20}
-            color="#A0A0A0"
-          />
-        }
-        placeholder="Senha"
-        value={senha}
-        onChangeText={setSenha}
-      />
+            {/* LEMBRAR */}
+            <TouchableOpacity
+              style={styles.rememberContainer}
+              onPress={() => setLembrar(!lembrar)}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.radio, lembrar && styles.radioSelected]}>
+                {lembrar && (
+                  <FontAwesome name="check" size={10} color="#FFFFFF" />
+                )}
+              </View>
+              <Text style={styles.rememberText}>
+                Lembrar de mim neste dispositivo
+              </Text>
+            </TouchableOpacity>
 
-      <View style={styles.optionsRow}>
-        <TouchableOpacity
-          style={styles.rememberContainer}
-          onPress={() => setLembrar(!lembrar)}
-        >
-          <View
-            style={[
-              styles.radio,
-              lembrar && styles.radioSelected,
-            ]}
-          />
+            {/* BOTÃO LOGIN */}
+            <TouchableOpacity
+              style={styles.loginButton}
+              onPress={handleLogin}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.loginButtonText}>Login</Text>
+            </TouchableOpacity>
 
-          <Text style={styles.rememberText}>
-            Lembrar de mim neste dispositivo
-          </Text>
-        </TouchableOpacity>
+            {/* REGISTRO */}
+            <View style={styles.registerContainer}>
+              <Text style={styles.registerText}>não possui conta?</Text>
+              <TouchableOpacity onPress={() => router.push('/cadastro')}>
+                <Text style={styles.registerLink}>Registre-se.</Text>
+              </TouchableOpacity>
+            </View>
+
+          </ScrollView>
+        </View>
+
       </View>
-
-      <TouchableOpacity
-        onPress={() => router.push('./esqueci')}
-      >
-        <Text style={styles.forgotPassword}>
-          Esqueceu sua senha?
-        </Text>
-      </TouchableOpacity>
-
-      <GreenButton
-        title="Entrar"
-        onPress={handleLogin}
-      />
-
-      <View style={styles.registerRow}>
-        <Text style={styles.registerText}>
-          Não possui conta?
-        </Text>
-
-        <TouchableOpacity
-          onPress={() => router.push('/cadastro')}
-        >
-          <Text style={styles.registerLink}>
-            {' '}Registrar-se
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  </View>
-</View>
-
-
-);
+    </KeyboardAvoidingView>
+  );
 }
+
+const GREEN = '#00B81D';
+const LIGHT_GRAY_TEXT = '#C9C9C9';
 
 const styles = StyleSheet.create({
-container: {
-flex: 1,
-backgroundColor: '#FAFAFA',
-},
+  container: {
+    flex: 1,
+   
+  },
 
-topImage: {
-width: '100%',
-height: 260,
-alignSelf: 'center',
-},
+  topImage: {
+    width: '100%',
+    height: 320,
+  },
 
-content: {
-flex: 1,
-paddingHorizontal: 32,
-marginTop: -10,
-},
+  card: {
+    flex: 1,
+    marginTop: -50,
+   
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    paddingHorizontal: 32,
+    paddingTop: 30,
+  },
 
-title: {
-fontSize: 34,
-fontWeight: '700',
-color: '#000',
-},
+  title: {
+    fontSize: 42,
+    fontWeight: 'bold',
+    color: GREEN,
+    marginBottom: 4,
+  },
 
-subtitle: {
-fontSize: 18,
-color: '#5A5A5A',
-marginTop: 4,
-marginBottom: 35,
-},
+  titleUnderline: {
+    width: 60,
+    height: 3,
+    backgroundColor: GREEN,
+    borderRadius: 2,
+    marginBottom: 10,
+  },
 
-form: {
-marginTop: 10,
-},
+  subtitle: {
+    fontSize: 14,
+    color: LIGHT_GRAY_TEXT,
+    fontWeight: '500',
+    marginBottom: 24,
+  },
 
-optionsRow: {
-marginTop: -10,
-marginBottom: 15,
-},
+  label: {
+    fontSize: 17,
+    color: '#6F6F6F',
+    fontWeight: '600',
+    marginTop: 18,
+    marginBottom: 6,
+  },
 
-rememberContainer: {
-flexDirection: 'row',
-alignItems: 'center',
-},
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1.5,
+    borderBottomColor: '#000000',
+    paddingBottom: 6,
+    paddingTop: 2,
+  },
 
-radio: {
-width: 18,
-height: 18,
-borderRadius: 9,
-borderWidth: 2,
-borderColor: '#00B612',
-marginRight: 8,
-},
+  input: {
+    flex: 1,
+    marginLeft: 10,
+    color: '#000',
+    fontSize: 14,
+    fontWeight: '500',
+  },
 
-radioSelected: {
-backgroundColor: '#00B612',
-},
+  forgotPassword: {
+    marginTop: 10,
+    color: LIGHT_GRAY_TEXT,
+    fontSize: 12,
+    fontWeight: '500',
+  },
 
-rememberText: {
-fontSize: 13,
-color: '#555',
-},
+  forgotLink: {
+    color: GREEN,
+    fontWeight: 'bold',
+  },
 
-forgotPassword: {
-textAlign: 'right',
-color: '#00B612',
-fontWeight: '600',
-marginBottom: 25,
-},
+  rememberContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 24,
+    marginBottom: 20,
+  },
 
-registerRow: {
-flexDirection: 'row',
-justifyContent: 'center',
-marginTop: 22,
-},
+  radio: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: GREEN,
+    marginRight: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
-registerText: {
-color: '#555',
-},
+  radioSelected: {
+    backgroundColor: GREEN,
+    borderColor: GREEN,
+  },
 
-registerLink: {
-color: '#00B612',
-fontWeight: '700',
-},
+  rememberText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: LIGHT_GRAY_TEXT,
+  },
+
+  loginButton: {
+    backgroundColor: GREEN,
+    height: 56,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+
+  loginButtonText: {
+    color: '#FFFFFF',
+    fontSize: 24,
+    fontWeight: 'bold',
+    letterSpacing: 0.5,
+  },
+
+  registerContainer: {
+    alignItems: 'center',
+    marginTop: 8,
+    gap: 2,
+  },
+
+  registerText: {
+    color: '#7A7A7A',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+
+  registerLink: {
+    color: GREEN,
+    fontWeight: 'bold',
+    fontSize: 13,
+  },
 });
